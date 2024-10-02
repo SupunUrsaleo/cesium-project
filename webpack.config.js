@@ -37,4 +37,9 @@ module.exports = {
       fs: false,
     },
   },
+  performance: {
+    maxEntrypointSize: 1024000,  // Set larger entry point size limit (in bytes)
+    maxAssetSize: 1024000,  // Set larger asset size limit (in bytes)
+    hints: false,  // You can change this to 'error' or 'false' to disable
+  },
 };

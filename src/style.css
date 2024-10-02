@@ -51,12 +51,12 @@ label {
 
 /* Input field styling */
 input[type="text"] {
-    width: 89%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+    width: 80% !important;
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
 }
 
 /* Button styling */
