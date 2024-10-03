@@ -1,6 +1,6 @@
 import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
-import './style.css';
+// import './style.css';
 
 // Set the base URL for static assets
 window.CESIUM_BASE_URL = '/Cesium';
