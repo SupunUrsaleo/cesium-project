@@ -123,7 +123,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       const towers = loadTowers();
       selectedTowerData = towers.find(tower => tower.id == selectedTowerId); // Store the tower data
 
-      // Update the delete popup with tower data
+      // Update the delete popup with tower data and show input for antenna
       document.getElementById('towerInfo').innerHTML = `
       <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
       <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
@@ -131,9 +131,9 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       <p style="color: white;"><strong>Heading:</strong> ${selectedTowerData.heading} m</p>
       <p style="color: white;"><strong>Pitch:</strong> ${selectedTowerData.pitch} m</p>
       <p style="color: white;"><strong>Roll:</strong> ${selectedTowerData.roll} m</p>
-    `;    
+      `;    
 
-      document.getElementById('infoTowerForm').style.display = 'block'; // Show the delete button
+      document.getElementById('infoTowerForm').style.display = 'block'; // Show the delete button and antenna form
     }
   }
 }, ScreenSpaceEventType.LEFT_CLICK);
@@ -150,6 +150,49 @@ document.getElementById('placeTowerBtn').addEventListener('click', () => {
 
   addTowerToLocalStorage(latitude, longitude, height, assetId, heading, pitch, roll);
 });
+
+// Event listener for adding antenna
+document.getElementById('addAntennaBtn').addEventListener('click', async () => {
+  const assetId = parseInt(document.getElementById('equipmentAssetId').value);
+  const antennaHeight = parseFloat(document.getElementById('antennaHeight').value);
+  const azimuth = parseFloat(document.getElementById('azimuth').value);  // Direction
+  const tilt = parseFloat(document.getElementById('tilt').value);        // Tilt angle
+  const offset = parseFloat(document.getElementById('offset').value);    // Offset distance
+
+  // Calculate the antenna position based on azimuth and offset
+  const { latitude, longitude } = selectedTowerData;
+  const antennaPosition = calculateOffsetPosition(latitude, longitude, offset, azimuth);
+
+  // Place the antenna on the tower (with asset ID)
+  await placeAntenna(assetId, antennaPosition, antennaHeight, tilt);
+});
+
+// Function to calculate antenna offset position based on azimuth and offset
+function calculateOffsetPosition(lat, lon, offset, azimuth) {
+  const earthRadius = 6378137; // Earth's radius in meters
+  const bearing = CesiumMath.toRadians(azimuth);
+
+  const newLat = lat + (offset / earthRadius) * (180 / Math.PI) * Math.cos(bearing);
+  const newLon = lon + (offset / earthRadius) * (180 / Math.PI) / Math.cos(CesiumMath.toRadians(lat)) * Math.sin(bearing);
+
+  return { latitude: newLat, longitude: newLon };
+}
+
+// Function to place antenna
+async function placeAntenna(assetId, position, height, tilt) {
+  const antennaUri = await IonResource.fromAssetId(assetId);
+
+  const orientation = Transforms.headingPitchRollQuaternion(
+    Cartesian3.fromDegrees(position.longitude, position.latitude, height),
+    new HeadingPitchRoll(CesiumMath.toRadians(0), CesiumMath.toRadians(tilt), 0)
+  );
+
+  viewer.entities.add({
+    position: Cartesian3.fromDegrees(position.longitude, position.latitude, height),
+    model: { uri: antennaUri },
+    orientation: orientation,
+  });
+}
 
 // Load towers on page load
 window.onload = async function () {
@@ -168,61 +211,7 @@ document.getElementById('deleteSelectedTowerBtn').addEventListener('click', () =
   }
 });
 
-function showDeletePopup() {
-  document.getElementById("infoTowerForm").style.display = "block";
-}
-
-// Close the popup
-function closeDeletePopup() {
-  document.getElementById("infoTowerForm").style.display = "none";
-}
-
-// Close the popup when clicking outside of it
-// window.onclick = function(event) {
-//   var form = document.getElementById("infoTowerForm");
-//   if (event.target != form && !form.contains(event.target)) {
-//       closeDeletePopup();
-//   }
-// }
-
 // Close popup when clicking on the close button
 document.getElementById("closeBtn").onclick = function() {
-  closeDeletePopup();
-}
-
-// viewer.screenSpaceEventHandler.setInputAction((movement) => {
-//   const pickedObject = viewer.scene.pick(movement.endPosition);
-  
-//   // Check if the object is hovered and has an id
-//   if (pickedObject && pickedObject.id) {
-//     const pickedId = pickedObject.id.id;
-
-//     // Show the description and trigger the delete popup on hover
-//     if (pickedId.startsWith('tower-')) {
-//       selectedTowerId = pickedId.split('-')[1]; // Extract the tower ID
-
-//       // Retrieve the tower data from localStorage
-//       const towers = loadTowers();
-//       selectedTowerData = towers.find(tower => tower.id == selectedTowerId); // Store the tower data
-
-//       // Update the delete popup with tower data
-//       document.getElementById('towerInfo').innerHTML = `
-//       <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
-//       <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
-//       <p style="color: white;"><strong>Height:</strong> ${selectedTowerData.height} m</p>
-//       <p style="color: white;"><strong>Heading:</strong> ${selectedTowerData.heading} m</p>
-//       <p style="color: white;"><strong>Pitch:</strong> ${selectedTowerData.pitch} m</p>
-//       <p style="color: white;"><strong>Roll:</strong> ${selectedTowerData.roll} m</p>
-//       `;
-
-//       // Show the popup and position it based on the mouse movement
-//       const infoTowerForm = document.getElementById('infoTowerForm');
-//       infoTowerForm.style.display = 'block';
-//       infoTowerForm.style.top = `${movement.endPosition.y + 20}px`;
-//       infoTowerForm.style.left = `${movement.endPosition.x + 20}px`;
-//     }
-//   } else {
-//     // If no object is hovered, hide the popup
-//     document.getElementById('infoTowerForm').style.display = 'none';
-//   }
-// }, ScreenSpaceEventType.MOUSE_MOVE);
+  document.getElementById("infoTowerForm").style.display = "none";
+};

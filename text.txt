@@ -1,0 +1,16 @@
+python3 -m http.server
+npx webpack serve
+npx webpack --config webpack.config.js
+npx webpack serve --port 8081
+
+
+#Token
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMWIzNzk3Mi1kY2YyLTRlOTQtOGJmOS1iY2UwNjE2MThlZGUiLCJpZCI6MjQ0NTE5LCJpYXQiOjE3Mjc0MjEwODR9.tldtgg1KubZFfYq6Alj4MJmb-9YLNAixQuvElaAaywE
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZTRmMDZhNS1jMTVmLTQxMTYtOGMwNi04NDAxMmJmOTZiYmEiLCJpZCI6MjQ0NTE5LCJpYXQiOjE3Mjc0MjgxMjJ9.JWqnRd89lZ2rwUKF44-bgZLvqRNDfHBPGEaNdKoEBB0
+
+
+(ID: 2756072)
+(ID: 2756070)
+2749930

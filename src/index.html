@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CesiumJS NPM Setup</title>
+  <title>CesiumJS Tower and Antenna Setup</title>
   <style>
     /* Basic styling for the Cesium container and full page layout */
     html, body, #cesiumContainer {
@@ -44,20 +44,19 @@
     }
 
     /* Label styling */
-      label {
-          display: block;
-          margin-bottom: 8px;
-          font-size: 14px;
-          color: #ffffff;
-      }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #ffffff;
+    }
 
-
-    /* Styling for the tower deletion form */
+    /* Styling for the tower deletion and antenna attachment form */
     #infoTowerForm {
       display: none;
       position: absolute;
-      top: 25%;
-      left: 50%;
+      top: 50%;
+      left: 80%;
       transform: translate(-50%, -50%);
       background: rgba(42, 42, 42, 0.8);
       padding: 10px;
@@ -138,13 +137,14 @@
         z-index: 100;
     }
 
+    /* Close button for delete and antenna popup */
     #closeBtn {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    color: white;
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-size: 20px;
+        cursor: pointer;
+        color: white;
     }
 
     #closeBtn:hover {
@@ -154,6 +154,7 @@
   </style>
 </head>
 <body>
+  <!-- Form for placing a tower -->
   <div id="inputForm">
       <h4>Place a Tower</h4>
       <label for="latitude">Latitude</label>
@@ -173,20 +174,38 @@
       <button id="placeTowerBtn">Place Tower</button>
   </div>
   
+  <!-- Form for tower details, adding antennas, and deleting towers -->
   <div id="infoTowerForm" style="display: none;">
     <span id="closeBtn">&times;</span>
     <h4>Tower Details</h4>
     <div id="towerInfo">
-      <!-- This will be populated with tower data (latitude, longitude, height) when a tower is selected -->
+      <!-- Tower data will be populated dynamically here -->
     </div>
+    
+    <!-- Form for adding antennas to the tower -->
+    <h4>Add Equipment</h4>
+    <label for="equipmentAssetId">Equipment Asset ID</label>
+    <input type="text" id="equipmentAssetId" placeholder="Enter Asset ID" required>
+
+    <label for="antennaHeight">Height (m)</label>
+    <input type="number" id="antennaHeight" placeholder="Enter height" required>
+
+    <label for="azimuth">Azimuth (0 to 360°)</label>
+    <input type="number" id="azimuth" placeholder="Enter azimuth" required>
+
+    <label for="tilt">Tilt (-90 to 90°)</label>
+    <input type="number" id="tilt" placeholder="Enter tilt" required>
+
+    <label for="offset">Offset (default: 1.5m)</label>
+    <input type="number" id="offset" placeholder="Enter offset" value="1.5" required>
+
+    <button id="addAntennaBtn">Add Equipment</button>
+
+    <!-- Button to delete the selected tower -->
     <button id="deleteSelectedTowerBtn">Delete Selected Tower</button>
   </div>
-  
 
   <div id="cesiumContainer"></div>
-  
-  <!-- Loading overlay -->
-  <!-- <div id="loadingOverlay"><h1>Loading...</h1></div> -->
 
   <!-- Toolbar for clustering -->
   <div id="toolbar">
