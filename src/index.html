@@ -23,57 +23,70 @@
     /* Styling for the tower placement form */
     #inputForm {
         position: absolute;
-        top: 150px;
+        top: 80px;
         left: 10px;
         padding: 10px;
         z-index: 1;
         border: 1px solid #ccc;
         border-radius: 5px;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(42, 42, 42, 0.8);
         width: 160px;
     }
 
     /* Use Cesium-like styling for input fields */
     #inputForm input {
-        vertical-align: middle;
-        padding-top: 2px;
-        padding-bottom: 2px;
-        margin-bottom: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-        width: 100%; /* Make the input fill the width of the form */
-        box-sizing: border-box;
+      width: 89%;
+      padding: 7px;
+      margin-bottom: 2px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
     }
 
+    /* Label styling */
+      label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 14px;
+          color: #ffffff;
+      }
+
+
     /* Styling for the tower deletion form */
-    #deleteTowerForm {
-        display: none;
-        position: absolute;
-        top: 200px;
-        left: 10px;
-        background: rgba(255, 0, 0, 0.8);
-        padding: 10px;
-        z-index: 1;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+    #infoTowerForm {
+      display: none;
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(42, 42, 42, 0.8);
+      padding: 10px;
+      z-index: 1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 300px; /* Adjust based on your needs */
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     /* Header styling for the form sections */
     h4 {
+        margin-top: unset;
         text-align: center;
         margin-bottom: 10px;
         font-size: 20px;
-        color: #333;
+        color: #ffffff;
     }
 
-
+    td {
+      color: #ffffff;
+    }
 
     /* Button styling */
     button {
         width: 100%;
         padding: 10px;
-        background-color: #444;
+        background-color: #1271ba;
         color: white;
         border: none;
         border-radius: 4px;
@@ -84,7 +97,7 @@
 
     /* Button hover effect */
     button:hover {
-        background-color: #555;
+        background-color: #0754c6;
     }
 
     /* Full height and width layout for Cesium viewer */
@@ -125,6 +138,19 @@
         z-index: 100;
     }
 
+    #closeBtn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+    }
+
+    #closeBtn:hover {
+        color: #ccc;
+    }
+
   </style>
 </head>
 <body>
@@ -147,10 +173,15 @@
       <button id="placeTowerBtn">Place Tower</button>
   </div>
   
-  <div id="deleteTowerForm">
-      <h4>Delete Tower</h4>
-      <button id="deleteSelectedTowerBtn">Delete Selected Tower</button>
+  <div id="infoTowerForm" style="display: none;">
+    <span id="closeBtn">&times;</span>
+    <h4>Tower Details</h4>
+    <div id="towerInfo">
+      <!-- This will be populated with tower data (latitude, longitude, height) when a tower is selected -->
+    </div>
+    <button id="deleteSelectedTowerBtn">Delete Selected Tower</button>
   </div>
+  
 
   <div id="cesiumContainer"></div>
   
