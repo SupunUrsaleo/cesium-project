@@ -1,7 +1,6 @@
 import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms, PinBuilder, VerticalOrigin, ScreenSpaceEventType } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
-// Set the base URL for static assets
 window.CESIUM_BASE_URL = '/Cesium';
 
 // Set your Cesium ion access token
@@ -15,7 +14,11 @@ const viewer = new Viewer('cesiumContainer', {
 const TOWER_ASSET_ID = 2749930;
 const EQUIPMENT_ASSET_ID = 2756072;
 const EQUIPMENT_OFFSET = 1.5;
-const TOWER_PITCH = 90; // Hardcoded pitch for the tower
+const TOWER_PITCH = 90; // Fixed pitch for tower orientation
+
+// Declare variables to track the selected tower
+let selectedTowerId = null;
+let selectedTowerData = {};
 
 // Sample JSON data
 const data = {
@@ -23,8 +26,7 @@ const data = {
     "location": {
       "latitude": 1.952786,
       "longitude": 102.682082,
-      "ground_elevation_m": 12,
-      "address": "Vacant Land, Lot 6349, Jalan Parit Subari Benting, Muar, Johor, Malaysia"
+      "ground_elevation_m": 12
     },
     "structure": {
       "height_m": 45
@@ -32,25 +34,16 @@ const data = {
   },
   "antennas": [
     {
-      "sector": 1,
-      "model": "AG Hybrid Bi Sec AMB4519R18v06",
-      "frequency_bands": ["GL900", "L1800", "L2100", "L2600", "Massive MIMO"],
       "height_agl_m": 43,
       "azimuth_degrees": 90,
       "mechanical_tilt_degrees": 0
     },
     {
-      "sector": 2,
-      "model": "Huawei DB 18/21 MM Antenna",
-      "frequency_bands": ["L1800", "L2100", "Massive MIMO"],
       "height_agl_m": 44,
       "azimuth_degrees": 210,
       "mechanical_tilt_degrees": 0
     },
     {
-      "sector": 3,
-      "model": "AG QuadB AQU4518R11v06",
-      "frequency_bands": ["GL900", "L1800", "L2100", "L2600"],
       "height_agl_m": 43,
       "azimuth_degrees": 300,
       "mechanical_tilt_degrees": 0
@@ -58,31 +51,30 @@ const data = {
   ]
 };
 
-// Function to load towers and equipments from JSON data
+// Load towers and equipments from JSON data
 function loadTowerFromJSON(data) {
   const { latitude, longitude, ground_elevation_m } = data.tower.location;
   const towerHeight = data.tower.structure.height_m;
 
-  // Log tower loading
-  console.log("Loading tower at location:", latitude, longitude);
-
-  // Place tower
-  const towerId = Date.now(); // Generate a unique ID for the tower (timestamp)
+  const towerId = Date.now(); 
   const newTower = { 
     id: towerId, 
     latitude, 
     longitude, 
     height: ground_elevation_m, 
     assetId: TOWER_ASSET_ID, 
-    heading: 0, // No heading provided, default to 0
-    pitch: TOWER_PITCH, // Hardcoded pitch value
-    roll: 0, // No roll provided, default to 0
-    equipments: [] // Empty array for equipments
+    heading: 0, 
+    pitch: TOWER_PITCH, 
+    roll: 0,
+    equipments: [] 
   };
-  placeTower(newTower, towerId); // Place the tower and pin on the map
+  
+  // Set the tower data directly
+  selectedTowerData = newTower;
+  placeTower(newTower, towerId);
 
-  // Place equipments
-  data.antennas.forEach(antenna => {
+  // Load equipments
+  data.antennas.forEach((antenna, index) => {
     const equipmentData = {
       assetId: EQUIPMENT_ASSET_ID,
       equipmentHeight: antenna.height_agl_m,
@@ -90,8 +82,7 @@ function loadTowerFromJSON(data) {
       tilt: antenna.mechanical_tilt_degrees,
       offset: EQUIPMENT_OFFSET
     };
-    
-    // Calculate offset position for the equipment
+
     const equipmentPosition = calculateOffsetPosition(latitude, longitude, EQUIPMENT_OFFSET, equipmentData.azimuth);
     placeEquipment(equipmentData.assetId, equipmentPosition, equipmentData.equipmentHeight, equipmentData.tilt);
   });
@@ -115,12 +106,12 @@ async function placeTower(tower, towerId) {
   const pin = pinBuilder.fromText("T", Color.BLUE, 48).toDataURL();
 
   viewer.entities.add({
-    id: `tower-${towerId.toString()}`, 
+    id: `tower-${towerId}`, 
     position: position,
     model: { uri: towerUri },
     orientation: orientation,
     description: `
-      <div style="font-family: Arial, sans-serif; padding: 10px; border-radius: 5px; background-color: #282828; color: #fff; border: 1px solid #ccc;">
+      <div style="font-family: Arial, sans-serif; padding: 10px; background-color: #282828; color: #fff;">
         <h2 style="text-align: center; color: #fff;">Tower Information</h2>
         <p><strong>Latitude:</strong> ${tower.latitude}</p>
         <p><strong>Longitude:</strong> ${tower.longitude}</p>
@@ -129,7 +120,7 @@ async function placeTower(tower, towerId) {
   });
 
   viewer.entities.add({
-    id: `pin-${towerId.toString()}`, 
+    id: `pin-${towerId}`, 
     position: position,
     billboard: {
       image: pin,
@@ -138,9 +129,48 @@ async function placeTower(tower, towerId) {
   });
 }
 
-// Function to calculate offset position for equipment
+// Event handler to manage mouse click events for pins
+viewer.screenSpaceEventHandler.setInputAction((click) => {
+  const pickedObject = viewer.scene.pick(click.position);
+  if (pickedObject && pickedObject.id) {
+    const pickedId = pickedObject.id.id;
+
+    if (pickedId.startsWith('pin-')) {
+      const towerId = pickedId.split('pin-')[1];
+      viewer.flyTo(viewer.entities.getById(`tower-${towerId}`), {
+        duration: 3
+      });
+    }
+
+    if (pickedId.startsWith('tower-')) {
+      selectedTowerId = pickedId.split('-')[1];
+
+      document.getElementById('towerInfo').innerHTML = `
+        <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
+        <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
+        <p style="color: white;"><strong>Height:</strong> ${selectedTowerData.height} m</p>
+      `;
+      document.getElementById('infoTowerForm').style.display = 'block';
+    }
+  }
+}, ScreenSpaceEventType.LEFT_CLICK);
+
+// Function to delete tower and pin from Cesium viewer
+function deleteTowerFromLocalStorage(towerId) {
+  viewer.entities.removeById(`tower-${towerId}`);
+  viewer.entities.removeById(`pin-${towerId}`);
+  document.getElementById('infoTowerForm').style.display = 'none';
+  selectedTowerId = null;
+}
+
+// Close popup when clicking on the close button
+document.getElementById("closeBtn").onclick = function() {
+  document.getElementById("infoTowerForm").style.display = "none";
+};
+
+// Function to calculate equipment position offset from the tower
 function calculateOffsetPosition(latitude, longitude, offset, azimuth) {
-  const R = 6371000; // Radius of the Earth in meters
+  const R = 6371000;
   const latOffset = offset / R * (180 / Math.PI);
   const lonOffset = offset / (R * Math.cos(Math.PI * latitude / 180)) * (180 / Math.PI);
 
@@ -150,7 +180,7 @@ function calculateOffsetPosition(latitude, longitude, offset, azimuth) {
   return { latitude: newLatitude, longitude: newLongitude };
 }
 
-// Function to place equipment on the tower
+// Function to place equipment on the map
 async function placeEquipment(assetId, position, height, tilt) {
   const equipmentUri = await IonResource.fromAssetId(assetId);
 
@@ -162,9 +192,9 @@ async function placeEquipment(assetId, position, height, tilt) {
   viewer.entities.add({
     position: Cartesian3.fromDegrees(position.longitude, position.latitude, height),
     model: { uri: equipmentUri },
-    orientation: orientation,
+    orientation: orientation
   });
 }
 
-// Load the tower and equipments from the JSON data
+// Load the tower and equipments from JSON data
 loadTowerFromJSON(data);
