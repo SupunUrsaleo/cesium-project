@@ -97,7 +97,20 @@ async function placeTower(tower, towerId) {
 function addTowerToLocalStorage(latitude, longitude, height, assetId, heading, pitch, roll) {
   const towerId = Date.now(); // Generate a unique ID for the tower (timestamp)
   const towers = loadTowers();
-  const newTower = { id: towerId, latitude, longitude, height, assetId, heading, pitch, roll };
+  
+  // Initialize the new tower with an empty equipments array
+  const newTower = { 
+    id: towerId, 
+    latitude, 
+    longitude, 
+    height, 
+    assetId, 
+    heading, 
+    pitch, 
+    roll,
+    equipments: [] // Empty array for equipments
+  };
+  
   towers.push(newTower);
   saveTowers(towers); // Save the new tower to localStorage
   placeTower(newTower, towerId); // Place the tower and pin on the map
@@ -123,7 +136,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       const towers = loadTowers();
       selectedTowerData = towers.find(tower => tower.id == selectedTowerId); // Store the tower data
 
-      // Update the delete popup with tower data and show input for antenna
+      // Update the delete popup with tower data and show input for equipment
       document.getElementById('towerInfo').innerHTML = `
       <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
       <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
@@ -133,7 +146,7 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       <p style="color: white;"><strong>Roll:</strong> ${selectedTowerData.roll} m</p>
       `;    
 
-      document.getElementById('infoTowerForm').style.display = 'block'; // Show the delete button and antenna form
+      document.getElementById('infoTowerForm').style.display = 'block'; // Show the delete button and equipment form
     }
   }
 }, ScreenSpaceEventType.LEFT_CLICK);
@@ -151,48 +164,43 @@ document.getElementById('placeTowerBtn').addEventListener('click', () => {
   addTowerToLocalStorage(latitude, longitude, height, assetId, heading, pitch, roll);
 });
 
-// Event listener for adding antenna
-document.getElementById('addAntennaBtn').addEventListener('click', async () => {
+// Event listener for adding equipment
+document.getElementById('addAntennaBtn').addEventListener('click', () => {
   const assetId = parseInt(document.getElementById('equipmentAssetId').value);
-  const antennaHeight = parseFloat(document.getElementById('antennaHeight').value);
+  const equipmentHeight = parseFloat(document.getElementById('antennaHeight').value);
   const azimuth = parseFloat(document.getElementById('azimuth').value);  // Direction
   const tilt = parseFloat(document.getElementById('tilt').value);        // Tilt angle
   const offset = parseFloat(document.getElementById('offset').value);    // Offset distance
 
-  // Calculate the antenna position based on azimuth and offset
-  const { latitude, longitude } = selectedTowerData;
-  const antennaPosition = calculateOffsetPosition(latitude, longitude, offset, azimuth);
+  // Retrieve the tower from localStorage
+  let towers = loadTowers();
+  let tower = towers.find(t => t.id == selectedTowerId);
 
-  // Place the antenna on the tower (with asset ID)
-  await placeAntenna(assetId, antennaPosition, antennaHeight, tilt);
+  // Add the new equipment details to the tower's equipments array
+  const newEquipment = { 
+    assetId, 
+    equipmentHeight, 
+    azimuth, 
+    tilt, 
+    offset 
+  };
+  tower.equipments.push(newEquipment); // Add the equipment to the tower
+
+  // Save the updated towers array back to localStorage
+  saveTowers(towers);
+
+  // Place the equipment on the tower in the viewer
+  const { latitude, longitude } = tower;
+  const equipmentPosition = calculateOffsetPosition(latitude, longitude, offset, azimuth);
+  placeEquipment(assetId, equipmentPosition, equipmentHeight, tilt);
+
+  // // Clear the form after adding the equipment
+  // document.getElementById('equipmentAssetId').value = '';
+  // document.getElementById('antennaHeight').value = '';
+  // document.getElementById('azimuth').value = '';
+  // document.getElementById('tilt').value = '';
+  // document.getElementById('offset').value = '1.5'; // Reset the offset to default
 });
-
-// Function to calculate antenna offset position based on azimuth and offset
-function calculateOffsetPosition(lat, lon, offset, azimuth) {
-  const earthRadius = 6378137; // Earth's radius in meters
-  const bearing = CesiumMath.toRadians(azimuth);
-
-  const newLat = lat + (offset / earthRadius) * (180 / Math.PI) * Math.cos(bearing);
-  const newLon = lon + (offset / earthRadius) * (180 / Math.PI) / Math.cos(CesiumMath.toRadians(lat)) * Math.sin(bearing);
-
-  return { latitude: newLat, longitude: newLon };
-}
-
-// Function to place antenna
-async function placeAntenna(assetId, position, height, tilt) {
-  const antennaUri = await IonResource.fromAssetId(assetId);
-
-  const orientation = Transforms.headingPitchRollQuaternion(
-    Cartesian3.fromDegrees(position.longitude, position.latitude, height),
-    new HeadingPitchRoll(CesiumMath.toRadians(0), CesiumMath.toRadians(tilt), 0)
-  );
-
-  viewer.entities.add({
-    position: Cartesian3.fromDegrees(position.longitude, position.latitude, height),
-    model: { uri: antennaUri },
-    orientation: orientation,
-  });
-}
 
 // Load towers on page load
 window.onload = async function () {
@@ -201,6 +209,15 @@ window.onload = async function () {
   const savedTowers = loadTowers();
   savedTowers.forEach(tower => {
     placeTower(tower, tower.id);
+
+    // If the tower has equipments, place them as well
+    if (tower.equipments && tower.equipments.length > 0) {
+      tower.equipments.forEach(equipment => {
+        const { latitude, longitude } = tower;
+        const equipmentPosition = calculateOffsetPosition(latitude, longitude, equipment.offset, equipment.azimuth);
+        placeEquipment(equipment.assetId, equipmentPosition, equipment.equipmentHeight, equipment.tilt);
+      });
+    }
   });
 };
 
@@ -215,3 +232,31 @@ document.getElementById('deleteSelectedTowerBtn').addEventListener('click', () =
 document.getElementById("closeBtn").onclick = function() {
   document.getElementById("infoTowerForm").style.display = "none";
 };
+
+// Function to calculate offset position for equipment
+function calculateOffsetPosition(latitude, longitude, offset, azimuth) {
+  const R = 6371000; // Radius of the Earth in meters
+  const latOffset = offset / R * (180 / Math.PI);
+  const lonOffset = offset / (R * Math.cos(Math.PI * latitude / 180)) * (180 / Math.PI);
+
+  const newLatitude = latitude + latOffset * Math.cos(CesiumMath.toRadians(azimuth));
+  const newLongitude = longitude + lonOffset * Math.sin(CesiumMath.toRadians(azimuth));
+
+  return { latitude: newLatitude, longitude: newLongitude };
+}
+
+// Function to place equipment on the tower
+async function placeEquipment(assetId, position, height, tilt) {
+  const equipmentUri = await IonResource.fromAssetId(assetId);
+
+  const orientation = Transforms.headingPitchRollQuaternion(
+    Cartesian3.fromDegrees(position.longitude, position.latitude, height),
+    new HeadingPitchRoll(CesiumMath.toRadians(0), CesiumMath.toRadians(tilt), 0)
+  );
+
+  viewer.entities.add({
+    position: Cartesian3.fromDegrees(position.longitude, position.latitude, height),
+    model: { uri: equipmentUri },
+    orientation: orientation,
+  });
+}
