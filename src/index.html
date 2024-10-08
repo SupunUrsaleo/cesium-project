@@ -181,28 +181,6 @@
     <div id="towerInfo">
       <!-- Tower data will be populated dynamically here -->
     </div>
-    
-    <!-- Form for adding antennas to the tower -->
-    <h4>Add Equipment</h4>
-    <label for="equipmentAssetId">Equipment Asset ID</label>
-    <input type="text" id="equipmentAssetId" placeholder="Enter Asset ID" required>
-
-    <label for="antennaHeight">Height (m)</label>
-    <input type="number" id="antennaHeight" placeholder="Enter height" required>
-
-    <label for="azimuth">Azimuth (0 to 360°)</label>
-    <input type="number" id="azimuth" placeholder="Enter azimuth" required>
-
-    <label for="tilt">Tilt (-90 to 90°)</label>
-    <input type="number" id="tilt" placeholder="Enter tilt" required>
-
-    <label for="offset">Offset (default: 1.5m)</label>
-    <input type="number" id="offset" placeholder="Enter offset" value="1.5" required>
-
-    <button id="addAntennaBtn">Add Equipment</button>
-
-    <!-- Button to delete the selected tower -->
-    <button id="deleteSelectedTowerBtn">Delete Selected Tower</button>
   </div>
 
   <div id="cesiumContainer"></div>

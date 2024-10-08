@@ -410,16 +410,30 @@ viewer.screenSpaceEventHandler.setInputAction((movement) => {
     } else if (pickedId.startsWith('tower-')) {
       // Logic for displaying tower details on hover
       selectedTowerId = pickedId.split('-')[1];
+
+      // Retrieve the tower data from localStorage
+      // Assuming selectedTowerId has already been set
+      console.log("Looking for tower with ID:", selectedTowerId);
+      const towers = loadTowers();
+      console.log("Towers loaded from localStorage:", towers);
       
-      // Assuming selectedTowerData is set up correctly from loadTowers function
-      document.getElementById('towerInfo').innerHTML = `
-        <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
-        <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
-        <p style="color: white;"><strong>Height:</strong> ${selectedTowerData.height} m</p>
-      `;
-      
+      const cleanId = selectedTowerId.split('-')[0]; // Take only the base ID before any suffix
+      selectedTowerData = towers.find(tower => tower.id.startsWith(cleanId));
+
+      if (selectedTowerData) {
+          document.getElementById('towerInfo').innerHTML = `
+              <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
+              <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
+              <p style="color: white;"><strong>Height:</strong> ${selectedTowerData.height} m</p>
+          `;
+
+      } else {
+          console.warn("No data found for the selected tower ID.");
+      }
+
       const infoTowerForm = document.getElementById('infoTowerForm');
       infoTowerForm.style.display = 'block';
+
     }
   } else {
     // Hide the tower info when not hovering over a tower
