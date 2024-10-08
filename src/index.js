@@ -1,4 +1,4 @@
-import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms, PinBuilder, VerticalOrigin, ScreenSpaceEventType } from 'cesium';
+import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms, PinBuilder, VerticalOrigin, ScreenSpaceEventType, CustomDataSource } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 window.CESIUM_BASE_URL = '/Cesium';
@@ -6,7 +6,6 @@ window.CESIUM_BASE_URL = '/Cesium';
 // Set your Cesium ion access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhZTRmMDZhNS1jMTVmLTQxMTYtOGMwNi04NDAxMmJmOTZiYmEiLCJpZCI6MjQ0NTE5LCJpYXQiOjE3Mjc0MjgxMjJ9.JWqnRd89lZ2rwUKF44-bgZLvqRNDfHBPGEaNdKoEBB0';
 
-// Initialize Cesium Viewer
 const viewer = new Viewer('cesiumContainer', {
   terrain: Terrain.fromWorldTerrain(),
 });
@@ -14,9 +13,8 @@ const viewer = new Viewer('cesiumContainer', {
 const TOWER_ASSET_ID = 2749930;
 const EQUIPMENT_ASSET_ID = 2756072;
 const EQUIPMENT_OFFSET = 1.5;
-const TOWER_PITCH = 90; // Fixed pitch for tower orientation
+const TOWER_PITCH = 90;
 
-// Declare variables to track the selected tower
 let selectedTowerId = null;
 let selectedTowerData = {};
 
@@ -169,15 +167,45 @@ function saveTowers(tower) {
   localStorage.setItem('towers', JSON.stringify(towers));
 }
 
-// Load towers and equipments from JSON data
+const clusterOptions = {
+  enabled: true,
+  pixelRange: 50,
+  minimumClusterSize: 2
+};
+
+const dataSource = new CustomDataSource("towers");
+
+function enableClustering() {
+  dataSource.clustering.enabled = clusterOptions.enabled;
+  dataSource.clustering.pixelRange = clusterOptions.pixelRange;
+  dataSource.clustering.minimumClusterSize = clusterOptions.minimumClusterSize;
+
+  const pinBuilder = new PinBuilder();
+
+  dataSource.clustering.clusterEvent.addEventListener((clusteredEntities, cluster) => {
+    cluster.label.show = false;
+    cluster.billboard.show = true;
+
+    const towerCount = clusteredEntities.length;
+    const clusterText = `${towerCount}`;
+    cluster.billboard.image = pinBuilder.fromText(clusterText, Color.GREEN, 48).toDataURL();
+    cluster.billboard.verticalOrigin = VerticalOrigin.BOTTOM;
+    
+    // Assign a unique ID to each cluster
+    cluster.billboard.id = `cluster-${Date.now()}`; 
+  });
+}
+
+
+viewer.dataSources.add(dataSource);
+enableClustering();
+
+// Function to load towers from JSON and place them with prefix only in Cesium
 function loadTowersFromJSON(dataArray) {
   dataArray.forEach((data, index) => {
     const { latitude, longitude, ground_elevation_m } = data.tower.location;
     const towerHeight = data.tower.structure.height_m;
-
-    // Ensure unique towerId
-    const towerId = `tower-${Date.now()}-${index}`;
-    console.log(`Placing Tower ID: ${towerId}, Latitude: ${latitude}, Longitude: ${longitude}`);
+    const towerId = `${Date.now()}-${index}`; // Generate ID without 'tower-' prefix
 
     const newTower = { 
       id: towerId, 
@@ -191,29 +219,38 @@ function loadTowersFromJSON(dataArray) {
       equipments: [] 
     };
 
-    selectedTowerData = newTower;
-    placeTower(newTower, towerId);
+    // Place tower in Cesium with prefixed ID
+    placeTower(newTower);
 
-    data.antennas.forEach((antenna) => {
+    // Process each antenna/equipment associated with this tower
+    data.antennas.forEach((antenna, antennaIndex) => {
       const equipmentData = {
-        assetId: EQUIPMENT_ASSET_ID,
+        assetId: EQUIPMENT_ASSET_ID, // Use the predefined asset ID
         equipmentHeight: antenna.height_agl_m,
         azimuth: antenna.azimuth_degrees,
         tilt: antenna.mechanical_tilt_degrees,
-        offset: EQUIPMENT_OFFSET
+        offset: EQUIPMENT_OFFSET,
       };
 
+      // Calculate the offset position for the equipment relative to the tower
       const equipmentPosition = calculateOffsetPosition(latitude, longitude, EQUIPMENT_OFFSET, equipmentData.azimuth);
+      
+      // Place equipment on the tower
       placeEquipment(equipmentData.assetId, equipmentPosition, equipmentData.equipmentHeight, equipmentData.tilt);
+      
+      // Add equipment data to the newTower object for saving
+      newTower.equipments.push(equipmentData);
     });
 
-    // Save each tower to localStorage
+    // Save tower (with equipment) to local storage
     saveTowers(newTower);
   });
 }
 
-// Function to place a tower model and pin on the map
-async function placeTower(tower, towerId) {
+
+// Function to place tower in Cesium
+async function placeTower(tower) {
+  const towerEntityId = `tower-${tower.id}`; // Prefix ID for Cesium
   const position = Cartesian3.fromDegrees(tower.longitude, tower.latitude, tower.height);
   const towerUri = await IonResource.fromAssetId(tower.assetId);
 
@@ -229,8 +266,8 @@ async function placeTower(tower, towerId) {
   const pinBuilder = new PinBuilder();
   const pin = pinBuilder.fromText("T", Color.BLUE, 48).toDataURL();
 
-  viewer.entities.add({
-    id: `tower-${towerId}`, 
+  dataSource.entities.add({
+    id: towerEntityId, // Use prefixed ID here
     position: position,
     model: { uri: towerUri },
     orientation: orientation,
@@ -243,8 +280,8 @@ async function placeTower(tower, towerId) {
       </div>`
   });
 
-  viewer.entities.add({
-    id: `pin-${towerId}`, 
+  dataSource.entities.add({
+    id: `pin-${tower.id}`,
     position: position,
     billboard: {
       image: pin,
@@ -256,19 +293,35 @@ async function placeTower(tower, towerId) {
 // Event handler to manage mouse click events for pins
 viewer.screenSpaceEventHandler.setInputAction((click) => {
   const pickedObject = viewer.scene.pick(click.position);
-  if (pickedObject && pickedObject.id) {
+
+  // Check if pickedObject and pickedObject.id exist before proceeding
+  if (pickedObject && pickedObject.id && pickedObject.id.id) {
     const pickedId = pickedObject.id.id;
 
-    if (pickedId.startsWith('pin-')) {
-      const towerId = pickedId.split('pin-')[1];
-      viewer.flyTo(viewer.entities.getById(`tower-${towerId}`), {
-        duration: 3
+    if (pickedId.startsWith('cluster-')) {
+      // Green pin (cluster) logic
+      const clusteredEntities = dataSource.entities.values.filter(entity => entity.billboard && entity.billboard.id === pickedId);
+      const positions = clusteredEntities.map(entity => entity.position.getValue(viewer.clock.currentTime));
+      const boundingSphere = BoundingSphere.fromPoints(positions);
+
+      viewer.camera.flyToBoundingSphere(boundingSphere, {
+        duration: 3,
+        offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), boundingSphere.radius * 2.0)
       });
-    }
-
-    if (pickedId.startsWith('tower-')) {
+    } else if (pickedId.startsWith('pin-')) {
+      // Blue pin (individual tower) logic
+      const towerId = pickedId.split('pin-')[1];
+      const towerEntity = dataSource.entities.getById(`tower-${towerId}`);
+      
+      if (towerEntity) {
+        viewer.flyTo(towerEntity, { duration: 3 });
+      } else {
+        console.error(`Tower entity with ID tower-${towerId} not found.`);
+      }
+    } else if (pickedId.startsWith('tower-')) {
+      // Logic for displaying tower details
       selectedTowerId = pickedId.split('-')[1];
-
+      
       document.getElementById('towerInfo').innerHTML = `
         <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
         <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
@@ -276,8 +329,11 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       `;
       document.getElementById('infoTowerForm').style.display = 'block';
     }
+  } else {
+    console.warn("Picked object or ID is not defined. Unable to process click event.");
   }
 }, ScreenSpaceEventType.LEFT_CLICK);
+
 
 // Function to delete tower and pin from Cesium viewer
 function deleteTowerFromLocalStorage(towerId) {
@@ -319,6 +375,4 @@ async function placeEquipment(assetId, position, height, tilt) {
     orientation: orientation
   });
 }
-
-// Load the tower and equipments from JSON data
 loadTowersFromJSON(data);
