@@ -163,9 +163,20 @@ function loadTowers() {
 
 function saveTowers(tower) {
   let towers = loadTowers();
-  towers.push(tower);
-  localStorage.setItem('towers', JSON.stringify(towers));
+
+  // Check if a tower with the same latitude and longitude already exists
+  const duplicateTower = towers.find(t => t.latitude === tower.latitude && t.longitude === tower.longitude);
+
+  if (!duplicateTower) {
+    // If no duplicate, add the new tower
+    towers.push(tower);
+    localStorage.setItem('towers', JSON.stringify(towers));
+    console.log(`Tower with ID: ${tower.id} saved successfully.`);
+  } else {
+    console.log(`Duplicate tower at latitude: ${tower.latitude}, longitude: ${tower.longitude} not saved.`);
+  }
 }
+
 
 const clusterOptions = {
   enabled: true,
