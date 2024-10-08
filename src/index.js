@@ -1,4 +1,4 @@
-import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms, PinBuilder, VerticalOrigin, ScreenSpaceEventType, CustomDataSource } from 'cesium';
+import { Cartesian3, createOsmBuildingsAsync, IonResource, Ion, Math as CesiumMath, Terrain, Viewer, Color, HeadingPitchRoll, Transforms, PinBuilder, VerticalOrigin, ScreenSpaceEventType, CustomDataSource, BoundingSphere,HeadingPitchRange } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 window.CESIUM_BASE_URL = '/Cesium';
@@ -181,21 +181,36 @@ function enableClustering() {
   dataSource.clustering.minimumClusterSize = clusterOptions.minimumClusterSize;
 
   const pinBuilder = new PinBuilder();
+  const clusterImage = pinBuilder.fromText("C", Color.GREEN, 48).toDataURL();
 
   dataSource.clustering.clusterEvent.addEventListener((clusteredEntities, cluster) => {
     cluster.label.show = false;
     cluster.billboard.show = true;
-
+    
+    // Set green pin for cluster
     const towerCount = clusteredEntities.length;
     const clusterText = `${towerCount}`;
     cluster.billboard.image = pinBuilder.fromText(clusterText, Color.GREEN, 48).toDataURL();
-    cluster.billboard.verticalOrigin = VerticalOrigin.BOTTOM;
     
-    // Assign a unique ID to each cluster
-    cluster.billboard.id = `cluster-${Date.now()}`; 
+    // Event listener for cluster pin click
+    cluster.billboard.id = `cluster-${Date.now()}`; // Unique ID for each cluster
+    viewer.screenSpaceEventHandler.setInputAction((click) => {
+      const pickedObject = viewer.scene.pick(click.position);
+      if (pickedObject && pickedObject.id === cluster.billboard.id) {
+        // Compute bounding sphere for clustered entities
+        const positions = clusteredEntities.map(entity => entity.position.getValue(viewer.clock.currentTime));
+        const boundingSphere = BoundingSphere.fromPoints(positions);
+  
+        // Fly to bounding sphere to zoom into the cluster scope
+        viewer.camera.flyToBoundingSphere(boundingSphere, {
+          duration: 3,
+          offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), boundingSphere.radius * 2.0)
+      });      
+      }
+    }, ScreenSpaceEventType.LEFT_CLICK);
   });
+  
 }
-
 
 viewer.dataSources.add(dataSource);
 enableClustering();
@@ -247,7 +262,6 @@ function loadTowersFromJSON(dataArray) {
   });
 }
 
-
 // Function to place tower in Cesium
 async function placeTower(tower) {
   const towerEntityId = `tower-${tower.id}`; // Prefix ID for Cesium
@@ -291,37 +305,36 @@ async function placeTower(tower) {
 }
 
 // Event handler to manage mouse click events for pins
+// Event handler to manage mouse click events for pins
+// Event handler to manage mouse click events for pins
 viewer.screenSpaceEventHandler.setInputAction((click) => {
   const pickedObject = viewer.scene.pick(click.position);
-
-  // Check if pickedObject and pickedObject.id exist before proceeding
-  if (pickedObject && pickedObject.id && pickedObject.id.id) {
+  if (pickedObject && pickedObject.id) {
     const pickedId = pickedObject.id.id;
 
-    if (pickedId.startsWith('cluster-')) {
-      // Green pin (cluster) logic
-      const clusteredEntities = dataSource.entities.values.filter(entity => entity.billboard && entity.billboard.id === pickedId);
-      const positions = clusteredEntities.map(entity => entity.position.getValue(viewer.clock.currentTime));
-      const boundingSphere = BoundingSphere.fromPoints(positions);
-
-      viewer.camera.flyToBoundingSphere(boundingSphere, {
-        duration: 3,
-        offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), boundingSphere.radius * 2.0)
-      });
-    } else if (pickedId.startsWith('pin-')) {
-      // Blue pin (individual tower) logic
+    if (pickedId.startsWith('pin-')) {
       const towerId = pickedId.split('pin-')[1];
       const towerEntity = dataSource.entities.getById(`tower-${towerId}`);
       
       if (towerEntity) {
-        viewer.flyTo(towerEntity, { duration: 3 });
+        const position = towerEntity.position.getValue(Cesium.JulianDate.now());
+        viewer.camera.flyTo({
+          destination: position,
+          duration: 3,
+          orientation: {
+            heading: viewer.camera.heading,
+            pitch: viewer.camera.pitch,
+            roll: 0.0,
+          }
+        });
       } else {
         console.error(`Tower entity with ID tower-${towerId} not found.`);
       }
-    } else if (pickedId.startsWith('tower-')) {
-      // Logic for displaying tower details
+    }
+
+    if (pickedId.startsWith('tower-')) {
       selectedTowerId = pickedId.split('-')[1];
-      
+
       document.getElementById('towerInfo').innerHTML = `
         <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
         <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
@@ -329,8 +342,6 @@ viewer.screenSpaceEventHandler.setInputAction((click) => {
       `;
       document.getElementById('infoTowerForm').style.display = 'block';
     }
-  } else {
-    console.warn("Picked object or ID is not defined. Unable to process click event.");
   }
 }, ScreenSpaceEventType.LEFT_CLICK);
 
@@ -375,4 +386,45 @@ async function placeEquipment(assetId, position, height, tilt) {
     orientation: orientation
   });
 }
+
+viewer.screenSpaceEventHandler.setInputAction((movement) => {
+  const pickedObject = viewer.scene.pick(movement.endPosition);
+
+  // Check if pickedObject and pickedObject.id exist before proceeding
+  if (pickedObject && pickedObject.id && pickedObject.id.id) {
+    const pickedId = pickedObject.id.id;
+
+    if (pickedId.startsWith('cluster-')) {
+      // Green pin (cluster) logic remains on click or other event as needed
+      // This could be left out of hover, or separated as needed
+    } else if (pickedId.startsWith('pin-')) {
+      // Blue pin (individual tower) logic remains the same
+      const towerId = pickedId.split('pin-')[1];
+      const towerEntity = dataSource.entities.getById(`tower-${towerId}`);
+      
+      if (towerEntity) {
+        viewer.flyTo(towerEntity, { duration: 3 });
+      } else {
+        console.error(`Tower entity with ID tower-${towerId} not found.`);
+      }
+    } else if (pickedId.startsWith('tower-')) {
+      // Logic for displaying tower details on hover
+      selectedTowerId = pickedId.split('-')[1];
+      
+      // Assuming selectedTowerData is set up correctly from loadTowers function
+      document.getElementById('towerInfo').innerHTML = `
+        <p style="color: white;"><strong>Latitude:</strong> ${selectedTowerData.latitude}</p>
+        <p style="color: white;"><strong>Longitude:</strong> ${selectedTowerData.longitude}</p>
+        <p style="color: white;"><strong>Height:</strong> ${selectedTowerData.height} m</p>
+      `;
+      
+      const infoTowerForm = document.getElementById('infoTowerForm');
+      infoTowerForm.style.display = 'block';
+    }
+  } else {
+    // Hide the tower info when not hovering over a tower
+    document.getElementById('infoTowerForm').style.display = 'none';
+  }
+}, ScreenSpaceEventType.MOUSE_MOVE);
+
 loadTowersFromJSON(data);
