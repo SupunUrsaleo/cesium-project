@@ -21,70 +21,194 @@ let selectedTowerId = null;
 let selectedTowerData = {};
 
 // Sample JSON data
-const data = {
-  "tower": {
-    "location": {
-      "latitude": 1.952786,
-      "longitude": 102.682082,
-      "ground_elevation_m": 12
+const data = [
+  {
+    "tower": {
+      "location": {
+        "latitude": 1.952786,
+        "longitude": 102.682082,
+        "ground_elevation_m": 12
+      },
+      "structure": {
+        "height_m": 45
+      }
     },
-    "structure": {
-      "height_m": 45
-    }
+    "antennas": [
+      {
+        "height_agl_m": 43,
+        "azimuth_degrees": 90,
+        "mechanical_tilt_degrees": 0
+      },
+      {
+        "height_agl_m": 44,
+        "azimuth_degrees": 210,
+        "mechanical_tilt_degrees": 0
+      },
+      {
+        "height_agl_m": 43,
+        "azimuth_degrees": 300,
+        "mechanical_tilt_degrees": 0
+      }
+    ]
   },
-  "antennas": [
-    {
-      "height_agl_m": 43,
-      "azimuth_degrees": 90,
-      "mechanical_tilt_degrees": 0
+  {
+    "tower": {
+      "location": {
+        "latitude": 1.961229,
+        "longitude": 102.689512,
+        "ground_elevation_m": 10
+      },
+      "structure": {
+        "height_m": 40
+      }
     },
-    {
-      "height_agl_m": 44,
-      "azimuth_degrees": 210,
-      "mechanical_tilt_degrees": 0
+    "antennas": [
+      {
+        "height_agl_m": 38,
+        "azimuth_degrees": 60,
+        "mechanical_tilt_degrees": 1
+      },
+      {
+        "height_agl_m": 39,
+        "azimuth_degrees": 180,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 1.945342,
+        "longitude": 102.675782,
+        "ground_elevation_m": 8
+      },
+      "structure": {
+        "height_m": 50
+      }
     },
-    {
-      "height_agl_m": 43,
-      "azimuth_degrees": 300,
-      "mechanical_tilt_degrees": 0
-    }
-  ]
-};
+    "antennas": [
+      {
+        "height_agl_m": 48,
+        "azimuth_degrees": 120,
+        "mechanical_tilt_degrees": 2
+      },
+      {
+        "height_agl_m": 47,
+        "azimuth_degrees": 240,
+        "mechanical_tilt_degrees": 2
+      },
+      {
+        "height_agl_m": 49,
+        "azimuth_degrees": 360,
+        "mechanical_tilt_degrees": 0
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 1.957789,
+        "longitude": 102.671220,
+        "ground_elevation_m": 15
+      },
+      "structure": {
+        "height_m": 35
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 33,
+        "azimuth_degrees": 90,
+        "mechanical_tilt_degrees": 3
+      },
+      {
+        "height_agl_m": 32,
+        "azimuth_degrees": 180,
+        "mechanical_tilt_degrees": 3
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 1.950234,
+        "longitude": 102.688752,
+        "ground_elevation_m": 20
+      },
+      "structure": {
+        "height_m": 42
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 41,
+        "azimuth_degrees": 150,
+        "mechanical_tilt_degrees": 1
+      },
+      {
+        "height_agl_m": 40,
+        "azimuth_degrees": 270,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  }
+];
+
+function loadTowers() {
+  const towersData = localStorage.getItem('towers');
+  if (towersData) {
+    return JSON.parse(towersData);
+  }
+  return [];
+}
+
+
+function saveTowers(tower) {
+  let towers = loadTowers();
+  towers.push(tower);
+  localStorage.setItem('towers', JSON.stringify(towers));
+}
 
 // Load towers and equipments from JSON data
-function loadTowerFromJSON(data) {
-  const { latitude, longitude, ground_elevation_m } = data.tower.location;
-  const towerHeight = data.tower.structure.height_m;
+function loadTowersFromJSON(dataArray) {
+  dataArray.forEach((data, index) => {
+    const { latitude, longitude, ground_elevation_m } = data.tower.location;
+    const towerHeight = data.tower.structure.height_m;
 
-  const towerId = Date.now(); 
-  const newTower = { 
-    id: towerId, 
-    latitude, 
-    longitude, 
-    height: ground_elevation_m, 
-    assetId: TOWER_ASSET_ID, 
-    heading: 0, 
-    pitch: TOWER_PITCH, 
-    roll: 0,
-    equipments: [] 
-  };
-  
-  // Set the tower data directly
-  selectedTowerData = newTower;
-  placeTower(newTower, towerId);
+    // Ensure unique towerId
+    const towerId = `tower-${Date.now()}-${index}`;
+    console.log(`Placing Tower ID: ${towerId}, Latitude: ${latitude}, Longitude: ${longitude}`);
 
-  // Load equipments
-  data.antennas.forEach((antenna, index) => {
-    const equipmentData = {
-      assetId: EQUIPMENT_ASSET_ID,
-      equipmentHeight: antenna.height_agl_m,
-      azimuth: antenna.azimuth_degrees,
-      tilt: antenna.mechanical_tilt_degrees,
-      offset: EQUIPMENT_OFFSET
+    const newTower = { 
+      id: towerId, 
+      latitude, 
+      longitude, 
+      height: ground_elevation_m, 
+      assetId: TOWER_ASSET_ID, 
+      heading: 0, 
+      pitch: TOWER_PITCH, 
+      roll: 0,
+      equipments: [] 
     };
 
-    const equipmentPosition = calculateOffsetPosition(latitude, longitude, EQUIPMENT_OFFSET, equipmentData.azimuth);
-    placeEquipment(equipmentData.assetId, equipmentPosition, equipmentData.equipmentHeight, equipmentData.tilt);
+    selectedTowerData = newTower;
+    placeTower(newTower, towerId);
+
+    data.antennas.forEach((antenna) => {
+      const equipmentData = {
+        assetId: EQUIPMENT_ASSET_ID,
+        equipmentHeight: antenna.height_agl_m,
+        azimuth: antenna.azimuth_degrees,
+        tilt: antenna.mechanical_tilt_degrees,
+        offset: EQUIPMENT_OFFSET
+      };
+
+      const equipmentPosition = calculateOffsetPosition(latitude, longitude, EQUIPMENT_OFFSET, equipmentData.azimuth);
+      placeEquipment(equipmentData.assetId, equipmentPosition, equipmentData.equipmentHeight, equipmentData.tilt);
+    });
+
+    // Save each tower to localStorage
+    saveTowers(newTower);
   });
 }
 
@@ -197,4 +321,4 @@ async function placeEquipment(assetId, position, height, tilt) {
 }
 
 // Load the tower and equipments from JSON data
-loadTowerFromJSON(data);
+loadTowersFromJSON(data);
