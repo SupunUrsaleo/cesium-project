@@ -1,0 +1,146 @@
+/* Basic styling for the Cesium container and full page layout */
+html, body, #cesiumContainer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Input fields */
+input {
+    vertical-align: middle;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Tower placement form */
+#inputForm {
+    position: absolute;
+    top: 80px;
+    left: 10px;
+    padding: 10px;
+    z-index: 1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: rgba(42, 42, 42, 0.8);
+    width: 160px;
+}
+
+#inputForm input {
+    width: 89%;
+    padding: 7px;
+    margin-bottom: 2px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Label styling */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+/* Tower details form */
+#infoTowerForm {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 80%;
+    transform: translate(-50%, -50%);
+    background: rgba(42, 42, 42, 0.8);
+    padding: 10px;
+    z-index: 1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form header */
+h4 {
+    margin-top: unset;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #ffffff;
+}
+
+/* Table cell text */
+td {
+    color: #ffffff;
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #1271ba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #0754c6;
+}
+
+/* Full height and width layout for Cesium viewer */
+#cesiumContainer {
+    width: 100%;
+    height: 100vh;
+}
+
+/* Loading overlay styling */
+#loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 100;
+}
+
+/* Close button styling */
+#closeBtn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+}
+
+#closeBtn:hover {
+    color: #ccc;
+}
+
+/* Signal strength slider container */
+#sliderContainer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    background: rgba(42, 42, 42, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    color: white;
+    transform: translateX(-50%);
+}
+
+#radiusSlider {
+    width: 150px;
+}
