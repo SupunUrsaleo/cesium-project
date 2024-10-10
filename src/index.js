@@ -149,7 +149,170 @@ const data = [
         "mechanical_tilt_degrees": 1
       }
     ]
-  }
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0023,
+        "longitude": 45.0015,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 55
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 50,
+        "azimuth_degrees": 90,
+        "mechanical_tilt_degrees": 2
+      },
+      {
+        "height_agl_m": 53,
+        "azimuth_degrees": 180,
+        "mechanical_tilt_degrees": 3
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0048,
+        "longitude": 45.0123,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 60
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 58,
+        "azimuth_degrees": 270,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0302,
+        "longitude": 45.0301,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 50
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 45,
+        "azimuth_degrees": 45,
+        "mechanical_tilt_degrees": 0
+      },
+      {
+        "height_agl_m": 47,
+        "azimuth_degrees": 135,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0567,
+        "longitude": 45.0668,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 65
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 60,
+        "azimuth_degrees": 90,
+        "mechanical_tilt_degrees": 2
+      },
+      {
+        "height_agl_m": 62,
+        "azimuth_degrees": 210,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0891,
+        "longitude": 45.0785,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 70
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 65,
+        "azimuth_degrees": 0,
+        "mechanical_tilt_degrees": 0
+      },
+      {
+        "height_agl_m": 68,
+        "azimuth_degrees": 180,
+        "mechanical_tilt_degrees": 2
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0732,
+        "longitude": 45.0456,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 58
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 54,
+        "azimuth_degrees": 120,
+        "mechanical_tilt_degrees": 1
+      },
+      {
+        "height_agl_m": 56,
+        "azimuth_degrees": 240,
+        "mechanical_tilt_degrees": 2
+      }
+    ]
+  },
+  {
+    "tower": {
+      "location": {
+        "latitude": 45.0917,
+        "longitude": 45.0992,
+        "ground_elevation_m": 40
+      },
+      "structure": {
+        "height_m": 63
+      }
+    },
+    "antennas": [
+      {
+        "height_agl_m": 60,
+        "azimuth_degrees": 30,
+        "mechanical_tilt_degrees": 0
+      },
+      {
+        "height_agl_m": 62,
+        "azimuth_degrees": 300,
+        "mechanical_tilt_degrees": 1
+      }
+    ]
+  },
 ];
 
 function loadTowers() {
@@ -254,21 +417,27 @@ function loadTowersFromJSON(dataArray) {
   });
 }
 
-// Function to add signal classification
-function addSignalClassification(tower) {
-  const radius = 0.001; // Adjust this for signal strength area size
+// Initial radius value
+let radius = 100;
 
-  viewer.entities.add({
-    polygon: {
-      hierarchy: new PolygonHierarchy(Cartesian3.fromDegreesArray([
-        tower.longitude + radius, tower.latitude + radius,
-        tower.longitude - radius, tower.latitude + radius,
-        tower.longitude - radius, tower.latitude - radius,
-        tower.longitude + radius, tower.latitude - radius
-      ])),
-      material: Color.RED.withAlpha(0.3),
+// Function to add signal classification with adjustable radius
+function addSignalClassification(tower) {
+  const circleEntity = viewer.entities.add({
+    position: Cartesian3.fromDegrees(tower.longitude, tower.latitude),
+    ellipse: {
+      semiMinorAxis: radius,
+      semiMajorAxis: radius,
+      material: Color.BLUE.withAlpha(0.3),
       classificationType: ClassificationType.BOTH
     }
+  });
+
+  // Update function to change the radius dynamically
+  document.getElementById('radiusSlider').addEventListener('input', (event) => {
+    radius = Number(event.target.value);
+    circleEntity.ellipse.semiMinorAxis = radius;
+    circleEntity.ellipse.semiMajorAxis = radius;
+    document.getElementById('radiusValue').textContent = radius; // Update radius display
   });
 }
 

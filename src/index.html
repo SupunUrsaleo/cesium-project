@@ -151,6 +151,22 @@
         color: #ccc;
     }
 
+    #sliderContainer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    background:  rgba(42, 42, 42, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    color: white;
+    }
+
+    #radiusSlider {
+      width: 150px;
+    }
+
+
   </style>
 </head>
 <body>
@@ -186,7 +202,7 @@
   <div id="cesiumContainer"></div>
 
   <!-- Toolbar for clustering -->
-  <div id="toolbar">
+  <!-- <div id="toolbar">
     <table>
       <tbody>
         <tr>
@@ -205,7 +221,13 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </div> -->
+
+  <div id="sliderContainer">
+    <label for="radiusSlider"> Signal Strength:</label>
+    <input type="range" id="radiusSlider" min="50" max="500" step="10" value="100">
+    <span id="radiusValue">100</span> m
+  </div>  
 
   <script type="module" src="./index.js"></script>
 </body>
