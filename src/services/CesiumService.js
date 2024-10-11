@@ -1,6 +1,7 @@
 import { Cartesian3, IonResource, Math as CesiumMath, Transforms, HeadingPitchRoll, PinBuilder, Color, ScreenSpaceEventType, BoundingSphere, HeadingPitchRange, VerticalOrigin } from 'cesium';
 import { viewer, dataSource } from './viewerInstance';
 import { saveTowers, loadTowers } from '../services/StorageService';
+import { closeInfoTowerForm } from '../utils/FormUtils';
 
 // Display and hide tower information functions
 function displayTowerInfo(towerId) {
@@ -100,6 +101,8 @@ export function setupEventHandlers() {
     }
   }, ScreenSpaceEventType.LEFT_CLICK);
 
+  document.getElementById("closeBtn").onclick = closeInfoTowerForm;
+
   // MOUSE_MOVE for hover effect on towers
   viewer.screenSpaceEventHandler.setInputAction((movement) => {
     const pickedObject = viewer.scene.pick(movement.endPosition);
@@ -189,3 +192,4 @@ export async function placeEquipment(assetId, position, height, tilt) {
     orientation: orientation
   });
 }
+

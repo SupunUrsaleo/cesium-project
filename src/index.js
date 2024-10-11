@@ -307,3 +307,4 @@ const data = [
   ];
 
 loadTowersFromJSON(data);
+
