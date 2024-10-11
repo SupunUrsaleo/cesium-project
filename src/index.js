@@ -304,6 +304,30 @@ const data = [
         }
       ]
     },
+    {
+      "tower": {
+        "location": {
+          "latitude": 51.5047,
+          "longitude": 0.1188,
+          "ground_elevation_m": 40
+        },
+        "structure": {
+          "height_m": 63
+        }
+      },
+      "antennas": [
+        {
+          "height_agl_m": 60,
+          "azimuth_degrees": 30,
+          "mechanical_tilt_degrees": 0
+        },
+        {
+          "height_agl_m": 62,
+          "azimuth_degrees": 300,
+          "mechanical_tilt_degrees": 1
+        }
+      ]
+    },
   ];
 
 loadTowersFromJSON(data);

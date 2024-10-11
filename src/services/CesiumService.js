@@ -83,7 +83,7 @@ export function setupEventHandlers() {
             destination: position,
             duration: 3
           });
-          displayTowerInfo(`tower-${towerId}`);
+          // displayTowerInfo(`tower-${towerId}`);
         }
       } else if (pickedObject.id === cluster.billboard.id) {
         // If it’s a cluster, handle clustering behavior
