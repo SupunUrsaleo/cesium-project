@@ -9,6 +9,7 @@
 <body>
   <!-- Form for placing a tower -->
   <div id="inputForm">
+    <form id="towerForm">
       <h4>Place a Tower</h4>
       <label for="latitude">Latitude</label>
       <input type="text" id="latitude" placeholder="Enter here" required>
@@ -24,8 +25,10 @@
       <input type="text" id="pitch" placeholder="Enter here" required>
       <label for="roll">Roll (-180 to 180°)</label>
       <input type="text" id="roll" placeholder="Enter here" required>
-      <button id="placeTowerBtn">Place Tower</button>
+      <button type="button" id="placeTowerBtn">Place Tower</button>
+    </form>
   </div>
+  
   
   <!-- Form for tower details, adding antennas, and deleting towers -->
   <div id="infoTowerForm" style="display: none;">
@@ -34,6 +37,7 @@
     <div id="towerInfo">
       <!-- Tower data will be populated dynamically here -->
     </div>
+    <button id="deleteTowerBtn">Delete Tower</button>
   </div>
 
   <div id="cesiumContainer"></div>

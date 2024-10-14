@@ -69,39 +69,46 @@ export function enableClustering() {
 // Function to set up event handlers for towers and clusters
 export function setupEventHandlers() {
   // LEFTCLICK for individual towers and clusters
-  viewer.screenSpaceEventHandler.setInputAction((click) => {
-    const pickedObject = viewer.scene.pick(click.position);
-    if (pickedObject && pickedObject.id) {
-      const pickedId = pickedObject.id.id || pickedObject.id; // Ensure to handle both cases
+  // viewer.screenSpaceEventHandler.setInputAction((click) => {
+  //   const pickedObject = viewer.scene.pick(click.position);
+  //   if (pickedObject && pickedObject.id) {
+  //     const pickedId = pickedObject.id.id || pickedObject.id; // Ensure to handle both cases
 
-      // Check if the picked object is a tower pin
-      if (typeof pickedId === 'string' && pickedId.startsWith('pin-')) {
-        const towerId = pickedId.split('pin-')[1];
-        const towerEntity = dataSource.entities.getById(`tower-${towerId}`);
-        if (towerEntity) {
-          const position = towerEntity.position.getValue(viewer.clock.currentTime);
-          viewer.camera.flyTo({
-            destination: position,
-            duration: 3
-          });
-          // displayTowerInfo(`tower-${towerId}`);
-        }
-      } else if (pickedObject.id === cluster.billboard.id) {
-        // If it’s a cluster, handle clustering behavior
-        const clusteredEntities = pickedObject.clusteredEntities;
-        if (clusteredEntities) {
-          const positions = clusteredEntities.map(entity => entity.position.getValue(viewer.clock.currentTime));
-          const boundingSphere = BoundingSphere.fromPoints(positions);
-          viewer.camera.flyToBoundingSphere(boundingSphere, {
-            duration: 3,
-            offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), boundingSphere.radius * 2.0)
-          });
-        }
-      }
-    }
-  }, ScreenSpaceEventType.LEFT_CLICK);
+  //     // Check if the picked object is a tower pin
+  //     if (typeof pickedId === 'string' && pickedId.startsWith('pin-')) {
+  //       const towerId = pickedId.split('pin-')[1];
+  //       const towerEntity = dataSource.entities.getById(`tower-${towerId}`);
+  //       if (towerEntity) {
+  //         const position = towerEntity.position.getValue(viewer.clock.currentTime);
+  //         viewer.camera.flyTo({
+  //           destination: position,
+  //           duration: 3
+  //         });
+  //         // displayTowerInfo(`tower-${towerId}`);
+  //       }
+  //     } else if (pickedObject.id === cluster.billboard.id) {
+  //       // If it’s a cluster, handle clustering behavior
+  //       const clusteredEntities = pickedObject.clusteredEntities;
+  //       if (clusteredEntities) {
+  //         const positions = clusteredEntities.map(entity => entity.position.getValue(viewer.clock.currentTime));
+  //         const boundingSphere = BoundingSphere.fromPoints(positions);
+  //         viewer.camera.flyToBoundingSphere(boundingSphere, {
+  //           duration: 3,
+  //           offset: new HeadingPitchRange(0, CesiumMath.toRadians(-45), boundingSphere.radius * 2.0)
+  //         });
+  //       }
+  //     }
+  //   }
+  // }, ScreenSpaceEventType.LEFT_CLICK);
 
   document.getElementById("closeBtn").onclick = closeInfoTowerForm;
+
+  // Add event listener for delete button
+  document.getElementById('deleteTowerBtn').addEventListener('click', () => {
+    if (selectedTowerId) {
+      deleteTowerFromLocalStorage(selectedTowerId);
+    }
+  });
 
   // MOUSE_MOVE for hover effect on towers
   viewer.screenSpaceEventHandler.setInputAction((movement) => {
@@ -137,7 +144,10 @@ export function setupEventHandlers() {
           document.getElementById('infoTowerForm').style.display = 'block';
         } else {
           console.warn("No data found for the selected tower ID:", selectedTowerId);
-          document.getElementById('infoTowerForm').style.display = 'none';
+          document.getElementById('towerInfo').innerHTML = `
+          <p style="color: white;"><strong>This is a demo Tower</strong></p>
+        `;
+          document.getElementById('infoTowerForm').style.display = 'block';
         }
       }
     } else {
@@ -191,5 +201,35 @@ export async function placeEquipment(assetId, position, height, tilt) {
     model: { uri: equipmentUri },
     orientation: orientation
   });
+}
+
+function deleteTowerFromLocalStorage(towerId) {
+  const towerEntityId = `tower-${towerId}`;
+  const pinEntityId = `pin-${towerId}`;
+  const signalEntityId = `signal-${towerId}`;
+
+  console.log(`Attempting to delete entities with IDs: ${towerEntityId}, ${pinEntityId}, and ${signalEntityId}`);
+  
+  // Remove entities from dataSource and viewer
+  const towerRemoved = dataSource.entities.removeById(towerEntityId);
+  const pinRemoved = dataSource.entities.removeById(pinEntityId);
+  const signalRemoved = viewer.entities.removeById(signalEntityId);
+
+  if (!towerRemoved) {
+    console.warn(`No tower entity found with ID: ${towerEntityId}`);
+  }
+  if (!pinRemoved) {
+    console.warn(`No pin entity found with ID: ${pinEntityId}`);
+  }
+  if (!signalRemoved) {
+    console.warn(`No signal entity found with ID: ${signalEntityId}`);
+  }
+
+  // Clear the selected tower and hide the info panel
+  if (towerRemoved || pinRemoved || signalRemoved) {
+    document.getElementById('infoTowerForm').style.display = 'none';
+    selectedTowerId = null;
+    console.log(`Deleted entities with IDs: ${towerEntityId}, ${pinEntityId}, and ${signalEntityId}`);
+  }
 }
 

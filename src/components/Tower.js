@@ -1,9 +1,9 @@
 import { addSignalClassification } from './Antenna';
 import { placeTower, placeEquipment } from '../services/CesiumService';
-import { saveTowers, loadTowers } from '../services/StorageService';
-import { dataSource } from '../services/viewerInstance';
+import { saveTowers } from '../services/StorageService';
 import { calculateOffsetPosition } from '../utils/CoordinateUtils';
 
+// Load towers from JSON
 export function loadTowersFromJSON(dataArray) {
   dataArray.forEach((data, index) => {
     const { latitude, longitude, ground_elevation_m } = data.tower.location;
@@ -39,5 +39,40 @@ export function loadTowersFromJSON(dataArray) {
 
     saveTowers(newTower);
     addSignalClassification(newTower);
+  });
+}
+
+// Function to place tower from the form submission
+export function setupFormSubmission() {
+  const placeTowerBtn = document.getElementById('placeTowerBtn');
+  
+  placeTowerBtn.addEventListener('click', () => {
+    const latitude = parseFloat(document.getElementById('latitude').value);
+    const longitude = parseFloat(document.getElementById('longitude').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const assetId = parseInt(document.getElementById('assetId').value, 10);
+    const heading = parseFloat(document.getElementById('heading').value);
+    const pitch = parseFloat(document.getElementById('pitch').value);
+    const roll = parseFloat(document.getElementById('roll').value);
+
+    const newTower = {
+      id: `${latitude}_${longitude}`,
+      latitude,
+      longitude,
+      height,
+      assetId,
+      heading,
+      pitch,
+      roll,
+      equipments: []
+    };
+
+    // Place the tower and add it to the map
+    placeTower(newTower);
+    // saveTowers(newTower);
+    addSignalClassification(newTower);
+
+    // Optional: clear the form after submission
+    // document.getElementById('inputForm').reset();
   });
 }
