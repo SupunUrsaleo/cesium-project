@@ -38,7 +38,7 @@ export function loadTowersFromJSON(dataArray) {
     });
 
     saveTowers(newTower);
-    addSignalClassification(newTower);
+    // addSignalClassification(newTower);
   });
 }
 
@@ -70,7 +70,7 @@ export function setupFormSubmission() {
     // Place the tower and add it to the map
     placeTower(newTower);
     // saveTowers(newTower);
-    addSignalClassification(newTower);
+    // addSignalClassification(newTower);
 
     // Optional: clear the form after submission
     // document.getElementById('inputForm').reset();

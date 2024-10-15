@@ -1,0 +1,51 @@
+[
+    {
+      "rf_source_id": 201,
+      "lon": 0.1189,
+      "lat": 51.5048,
+      "rf_signal_strength_dbm": -65.0
+    },
+    {
+      "rf_source_id": 202,
+      "lon": 0.1199,
+      "lat": 51.5046,
+      "rf_signal_strength_dbm": -75.0
+    },
+    {
+      "rf_source_id": 203,
+      "lon": 0.1167,
+      "lat": 51.5045,
+      "rf_signal_strength_dbm": -80.0
+    },
+    {
+      "rf_source_id": 204,
+      "lon": 0.1156,
+      "lat": 51.5049,
+      "rf_signal_strength_dbm": -90.0
+    },
+    {
+      "rf_source_id": 205,
+      "lon": 0.1121,
+      "lat": 51.5047,
+      "rf_signal_strength_dbm": -95.0
+    },
+    {
+      "rf_source_id": 206,
+      "lon": 0.1105,
+      "lat": 51.5050,
+      "rf_signal_strength_dbm": -100.0
+    },
+    {
+      "rf_source_id": 207,
+      "lon": 0.1214,
+      "lat": 51.5044,
+      "rf_signal_strength_dbm": -110.0
+    },
+    {
+      "rf_source_id": 208,
+      "lon": 0.1252,
+      "lat": 51.5043,
+      "rf_signal_strength_dbm": -120.0
+    }
+  ]
+  
