@@ -7,7 +7,7 @@ import { calculateOffsetPosition } from '../utils/CoordinateUtils';
 export function loadTowersFromJSON(dataArray) {
   dataArray.forEach((data, index) => {
     const { latitude, longitude, ground_elevation_m } = data.tower.location;
-    const towerId = `${latitude}_${longitude}`;
+    const towerId = `${latitude}&${longitude}`;
     
     const newTower = { 
       id: towerId, 
@@ -56,7 +56,7 @@ export function setupFormSubmission() {
     const roll = parseFloat(document.getElementById('roll').value);
 
     const newTower = {
-      id: `${latitude}_${longitude}`,
+      id: `${latitude}&${longitude}`,
       latitude,
       longitude,
       height,

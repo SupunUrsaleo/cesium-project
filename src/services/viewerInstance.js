@@ -1,4 +1,4 @@
-import { Viewer, CustomDataSource, Ion, createGooglePhotorealistic3DTileset, Rectangle, Color, Entity } from 'cesium';
+import { Viewer, CustomDataSource, Ion, createGooglePhotorealistic3DTileset, Rectangle, Color, Entity, viewerCesiumInspectorMixin, createWorldTerrainAsync } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 window.CESIUM_BASE_URL = '/Cesium';
@@ -10,8 +10,16 @@ export const viewer = new Viewer('cesiumContainer', {
   animation: false,
   sceneModePicker: false,
   baseLayerPicker: false,
+  // terrainProvider: createWorldTerrainAsync(), // Terrain provider added
   globe: false,
 });
+
+// const scene = viewer.scene;
+// scene.globe.depthTestAgainstTerrain = true;  // Enable depth test against terrain
+
+// //Add Cesium Inspector for debugging (useful during development)
+// viewer.extend(viewerCesiumInspectorMixin);
+
 
 // Add a Custom Data Source for towers
 export const dataSource = new CustomDataSource("towers");
@@ -32,7 +40,7 @@ function addGlobalRedLayer() {
   const worldRectangleEntity = new Entity({
     rectangle: {
       coordinates: Rectangle.fromDegrees(-180, -90, 180, 90),
-      material: Color.RED.withAlpha(0.5),  // Apply a semi-transparent red color
+      material: Color.RED.withAlpha(0.3),  // Apply a semi-transparent red color
     }
   });
   

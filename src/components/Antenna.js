@@ -1,29 +1,15 @@
 import { viewer } from '../services/viewerInstance';
-import { Cartesian3, ClassificationType, HeightReference } from 'cesium';
+import { Rectangle, ClassificationType, HeightReference, Cartesian3 } from 'cesium';
 
-// Function to create a smooth radial gradient texture
-function createUltraSmoothRadialGradientTexture(opacity) {
+// Function to create a color based on signal strength opacity
+function getSignalColor(opacity) {
   const canvas = document.createElement('canvas');
-  const size = 50;
+  const size = 10; // Small size for pixel-like effect
   canvas.width = size;
   canvas.height = size;
 
   const ctx = canvas.getContext('2d');
-  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-
-  // Apply color stops for coverage gradient
-  gradient.addColorStop(0.0, `rgba(255, 255, 0, ${opacity})`);  // Strong Yellow
-  gradient.addColorStop(0.1, `rgba(255, 253, 0, ${opacity * 0.9})`);
-  gradient.addColorStop(0.2, `rgba(255, 251, 0, ${opacity * 0.8})`);
-  gradient.addColorStop(0.3, `rgba(255, 248, 0, ${opacity * 0.7})`);
-  gradient.addColorStop(0.4, `rgba(255, 243, 0, ${opacity * 0.6})`);
-  gradient.addColorStop(0.5, `rgba(255, 235, 0, ${opacity * 0.5})`);
-  gradient.addColorStop(0.6, `rgba(255, 225, 0, ${opacity * 0.4})`);
-  gradient.addColorStop(0.7, `rgba(255, 210, 0, ${opacity * 0.3})`);
-  gradient.addColorStop(0.8, `rgba(255, 190, 0, ${opacity * 0.2})`);
-  gradient.addColorStop(1.0, `rgba(255, 255, 0, 0)`);
-
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = `rgba(255, 255, 0, ${opacity})`; // Yellow color with varying opacity
   ctx.fillRect(0, 0, size, size);
 
   return canvas.toDataURL();
@@ -45,8 +31,6 @@ export function addSignalClassification(signal) {
 
   const maxSignalStrength = -65; // Define strong signal threshold
   const minSignalStrength = -130; // Define weak signal threshold
-  const maxRadius = 150; // Define max radius for coverage
-  const minRadius = 10; // Set a minimum radius for weak signals
 
   // Check if signal strength is valid
   if (typeof signal.signalStrength !== 'number' || signal.signalStrength < minSignalStrength || signal.signalStrength > maxSignalStrength) {
@@ -54,26 +38,30 @@ export function addSignalClassification(signal) {
     return; // Skip this signal if signal strength is invalid or missing
   }
 
-  // Calculate radius based on signal strength, and ensure it’s at least the minimum radius
-  const scale = (maxSignalStrength - signal.signalStrength) / (maxSignalStrength - minSignalStrength);
-  const radius = Math.max(maxRadius * scale, minRadius);
+  // Calculate opacity based on signal strength
+  // Calculate opacity based on signal strength using an exponential scale for better differentiation
+  const linearScale = (maxSignalStrength - signal.signalStrength) / (maxSignalStrength - minSignalStrength);
+  const exponent = 2.5; // Adjust this value to control the curve (higher = more pronounced difference)
+  const opacity = Math.pow(Math.min(Math.max(linearScale, 0), 1), exponent); 
+  const signalTexture = getSignalColor(opacity);
 
-  // Generate gradient texture based on opacity
-  const opacity = Math.min(Math.max(scale, 0), 1);
-  const smoothGradientTexture = createUltraSmoothRadialGradientTexture(opacity);
+  // Define a small square around the coordinates
+  const delta = 0.00005; // Adjust for desired size of the square
+  const rectangleCoordinates = Rectangle.fromDegrees(
+    signal.longitude - delta,
+    signal.latitude - delta,
+    signal.longitude + delta,
+    signal.latitude + delta
+  );
 
-  // Add the entity to Cesium viewer
+  // Represent each signal as a small pixel-like square
   viewer.entities.add({
-    id: `signal-${signal.id}`,
-    position: Cartesian3.fromDegrees(signal.longitude, signal.latitude),
-    ellipse: {
-      semiMinorAxis: radius,
-      semiMajorAxis: radius,
-      material: smoothGradientTexture,
+    id: `signal_${signal.id}_${signal.longitude}_${signal.latitude}`,
+    rectangle: {
+      coordinates: rectangleCoordinates,
+      material: signalTexture,
       classificationType: ClassificationType.BOTH,
       heightReference: HeightReference.CLAMP_TO_GROUND,
     },
   });
 }
-
-
