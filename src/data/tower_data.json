@@ -271,8 +271,8 @@
     {
       "tower": {
         "location": {
-          "latitude": 51.5037,
-          "longitude": 0.1195,
+          "latitude": 51.5032,
+          "longitude": 0.1200,
           "ground_elevation_m": 40
         },
         "structure": {
@@ -298,6 +298,30 @@
           "latitude": 51.5047,
           "longitude": 0.1188,
           "ground_elevation_m": 40
+        },
+        "structure": {
+          "height_m": 63
+        }
+      },
+      "antennas": [
+        {
+          "height_agl_m": 60,
+          "azimuth_degrees": 30,
+          "mechanical_tilt_degrees": 0
+        },
+        {
+          "height_agl_m": 62,
+          "azimuth_degrees": 300,
+          "mechanical_tilt_degrees": 1
+        }
+      ]
+    },
+    {
+      "tower": {
+        "location": {
+          "latitude": 47.583469924323,
+          "longitude": -122.319199881665,
+          "ground_elevation_m": 0
         },
         "structure": {
           "height_m": 63

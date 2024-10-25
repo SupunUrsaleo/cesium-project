@@ -155,15 +155,15 @@ export async function placeTower(tower) {
   });
 
     // Fly to the tower location
-    viewer.camera.flyTo({
-      destination: position, // Destination is the tower's position
-      orientation: {
-        heading: CesiumMath.toRadians(0), // Adjust as needed
-        pitch: CesiumMath.toRadians(-45), // Pitch angle (e.g., -45 degrees for a bird's eye view)
-        roll: 0.0
-      },
-      duration: 3 // Fly duration in seconds
-    });
+    // viewer.camera.flyTo({
+    //   destination: position, // Destination is the tower's position
+    //   orientation: {
+    //     heading: CesiumMath.toRadians(0), // Adjust as needed
+    //     pitch: CesiumMath.toRadians(-45), // Pitch angle (e.g., -45 degrees for a bird's eye view)
+    //     roll: 0.0
+    //   },
+    //   duration: 3 // Fly duration in seconds
+    // });
 }
 
 // Function to add equipment to the map

@@ -29,7 +29,7 @@ export function addSignalClassification(signal) {
     return; // Skip this signal if coordinates are invalid
   }
 
-  const maxSignalStrength = -65; // Define strong signal threshold
+  const maxSignalStrength = -55; // Define strong signal threshold
   const minSignalStrength = -130; // Define weak signal threshold
 
   // Check if signal strength is valid
