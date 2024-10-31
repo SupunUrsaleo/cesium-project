@@ -18,45 +18,45 @@ function getSignalColor(opacity) {
 export function addSignalClassification(signal) {
   // Validate latitude and longitude
   if (
-    typeof signal.latitude !== 'number' || 
-    typeof signal.longitude !== 'number' || 
-    signal.latitude < -90 || 
-    signal.latitude > 90 || 
-    signal.longitude < -180 || 
-    signal.longitude > 180
+    typeof signal.y !== 'number' || 
+    typeof signal.x !== 'number' || 
+    signal.y < -90 || 
+    signal.y > 90 || 
+    signal.x < -180 || 
+    signal.x > 180
   ) {
-    console.error(`Invalid signal coordinates: ${signal.latitude}, ${signal.longitude}`);
+    console.error(`Invalid signal coordinates: ${signal.y}, ${signal.x}`);
     return; // Skip this signal if coordinates are invalid
   }
 
-  const maxSignalStrength = -55; // Define strong signal threshold
+  const maxSignalStrength = -45; // Define strong signal threshold
   const minSignalStrength = -130; // Define weak signal threshold
 
   // Check if signal strength is valid
-  if (typeof signal.signalStrength !== 'number' || signal.signalStrength < minSignalStrength || signal.signalStrength > maxSignalStrength) {
-    console.warn(`Invalid or missing signal strength for signal ID ${signal.id}: ${signal.signalStrength}`);
+  if (typeof signal.max_rf_signal_strength_dbm !== 'number' || signal.max_rf_signal_strength_dbm < minSignalStrength || signal.max_rf_signal_strength_dbm > maxSignalStrength) {
+    console.warn(`Invalid or missing signal strength for signal ID ${signal.rf_source_id}: ${signal.max_rf_signal_strength_dbm} :${signal.x} :${signal.y}`);
     return; // Skip this signal if signal strength is invalid or missing
   }
 
-  // Calculate opacity based on signal strength
   // Calculate opacity based on signal strength using an exponential scale for better differentiation
-  const linearScale = (maxSignalStrength - signal.signalStrength) / (maxSignalStrength - minSignalStrength);
+  const linearScale = (maxSignalStrength - signal.max_rf_signal_strength_dbm) / (maxSignalStrength - minSignalStrength);
   const exponent = 2.5; // Adjust this value to control the curve (higher = more pronounced difference)
   const opacity = Math.pow(Math.min(Math.max(linearScale, 0), 1), exponent); 
   const signalTexture = getSignalColor(opacity);
 
-  // Define a small square around the coordinates
-  const delta = 0.00005; // Adjust for desired size of the square
+  const deltaLon = 0.00006;  // Larger width (longitude change)
+  const deltaLat = 0.000045; // Smaller height (latitude change)
+  
   const rectangleCoordinates = Rectangle.fromDegrees(
-    signal.longitude - delta,
-    signal.latitude - delta,
-    signal.longitude + delta,
-    signal.latitude + delta
+    signal.x - deltaLon,
+    signal.y - deltaLat,
+    signal.x + deltaLon,
+    signal.y + deltaLat
   );
 
   // Represent each signal as a small pixel-like square
   viewer.entities.add({
-    id: `signal_${signal.id}_${signal.longitude}_${signal.latitude}`,
+    id: `signal_${signal.rf_source_id}_${signal.x}_${signal.y}`,
     rectangle: {
       coordinates: rectangleCoordinates,
       material: signalTexture,
@@ -65,3 +65,4 @@ export function addSignalClassification(signal) {
     },
   });
 }
+

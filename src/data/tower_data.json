@@ -132,145 +132,6 @@
     {
       "tower": {
         "location": {
-          "latitude": 45.0023,
-          "longitude": 45.0015,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 55
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 50,
-          "azimuth_degrees": 90,
-          "mechanical_tilt_degrees": 2
-        },
-        {
-          "height_agl_m": 53,
-          "azimuth_degrees": 180,
-          "mechanical_tilt_degrees": 3
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
-          "latitude": 45.0048,
-          "longitude": 45.0123,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 60
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 58,
-          "azimuth_degrees": 270,
-          "mechanical_tilt_degrees": 1
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
-          "latitude": 45.0302,
-          "longitude": 45.0301,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 50
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 45,
-          "azimuth_degrees": 45,
-          "mechanical_tilt_degrees": 0
-        },
-        {
-          "height_agl_m": 47,
-          "azimuth_degrees": 135,
-          "mechanical_tilt_degrees": 1
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
-          "latitude": 45.0567,
-          "longitude": 45.0668,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 65
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 60,
-          "azimuth_degrees": 90,
-          "mechanical_tilt_degrees": 2
-        },
-        {
-          "height_agl_m": 62,
-          "azimuth_degrees": 210,
-          "mechanical_tilt_degrees": 1
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
-          "latitude": 45.0891,
-          "longitude": 45.0785,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 70
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 65,
-          "azimuth_degrees": 0,
-          "mechanical_tilt_degrees": 0
-        },
-        {
-          "height_agl_m": 68,
-          "azimuth_degrees": 180,
-          "mechanical_tilt_degrees": 2
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
-          "latitude": 45.0732,
-          "longitude": 45.0456,
-          "ground_elevation_m": 40
-        },
-        "structure": {
-          "height_m": 58
-        }
-      },
-      "antennas": [
-        {
-          "height_agl_m": 54,
-          "azimuth_degrees": 120,
-          "mechanical_tilt_degrees": 1
-        },
-        {
-          "height_agl_m": 56,
-          "azimuth_degrees": 240,
-          "mechanical_tilt_degrees": 2
-        }
-      ]
-    },
-    {
-      "tower": {
-        "location": {
           "latitude": 51.5032,
           "longitude": 0.1200,
           "ground_elevation_m": 40
@@ -321,6 +182,54 @@
         "location": {
           "latitude": 47.583469924323,
           "longitude": -122.319199881665,
+          "ground_elevation_m": 0
+        },
+        "structure": {
+          "height_m": 63
+        }
+      },
+      "antennas": [
+        {
+          "height_agl_m": 60,
+          "azimuth_degrees": 30,
+          "mechanical_tilt_degrees": 0
+        },
+        {
+          "height_agl_m": 62,
+          "azimuth_degrees": 300,
+          "mechanical_tilt_degrees": 1
+        }
+      ]
+    },
+    {
+      "tower": {
+        "location": {
+          "latitude": 47.6146392822,
+          "longitude": -122.3070983887,
+          "ground_elevation_m": 0
+        },
+        "structure": {
+          "height_m": 63
+        }
+      },
+      "antennas": [
+        {
+          "height_agl_m": 60,
+          "azimuth_degrees": 30,
+          "mechanical_tilt_degrees": 0
+        },
+        {
+          "height_agl_m": 62,
+          "azimuth_degrees": 300,
+          "mechanical_tilt_degrees": 1
+        }
+      ]
+    },
+    {
+      "tower": {
+        "location": {
+          "latitude": 47.5941200256,
+          "longitude": -122.3197021484,
           "ground_elevation_m": 0
         },
         "structure": {

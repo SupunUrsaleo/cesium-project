@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@heavyai/connector": "^7.0.0",
     "cesium": "^1.122.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { Cartesian3, IonResource, Math as CesiumMath, Transforms, HeadingPitchRoll, PinBuilder, Color, ScreenSpaceEventType, BoundingSphere, HeadingPitchRange, VerticalOrigin } from 'cesium';
+import { Cartesian3, IonResource, Math as CesiumMath, HeightReference, sampleTerrainMostDetailed, Transforms, HeadingPitchRoll, PinBuilder, Color, ScreenSpaceEventType, BoundingSphere, HeadingPitchRange, VerticalOrigin } from 'cesium';
 import { viewer, dataSource } from './viewerInstance';
 import { saveTowers, loadTowers } from '../services/StorageService';
 import { closeInfoTowerForm } from '../utils/FormUtils';
@@ -127,7 +127,9 @@ export function setupEventHandlers() {
 
 // Function to add a tower entity to the dataSource
 export async function placeTower(tower) {
-  const position = Cartesian3.fromDegrees(tower.longitude, tower.latitude, tower.height);
+  // Remove the height from the position to let it be clamped to terrain
+  const position = Cartesian3.fromDegrees(tower.longitude, tower.latitude); // Removed tower.height to clamp to ground
+  
   const orientation = Transforms.headingPitchRollQuaternion(
     position,
     new HeadingPitchRoll(CesiumMath.toRadians(tower.heading), CesiumMath.toRadians(tower.pitch), CesiumMath.toRadians(tower.roll))
@@ -138,33 +140,29 @@ export async function placeTower(tower) {
   const pinBuilder = new PinBuilder();
   const pin = pinBuilder.fromText("T", Color.BLUE, 48).toDataURL();
 
+  // Add the tower model and clamp to ground
   dataSource.entities.add({
     id: towerEntityId,
     position: position,
-    model: { uri: towerUri },
+    model: { 
+      uri: towerUri,
+      heightReference: HeightReference.CLAMP_TO_GROUND, // Clamp tower to the ground
+    },
     orientation: orientation,
   });
 
+  // Add the pin, also clamped to the ground
   dataSource.entities.add({
     id: `pin_${tower.id}`,
     position: position,
     billboard: {
       image: pin,
-      verticalOrigin: VerticalOrigin.BOTTOM
+      verticalOrigin: VerticalOrigin.BOTTOM,
+      heightReference: HeightReference.CLAMP_TO_GROUND, // Clamp pin to the ground
     }
   });
-
-    // Fly to the tower location
-    // viewer.camera.flyTo({
-    //   destination: position, // Destination is the tower's position
-    //   orientation: {
-    //     heading: CesiumMath.toRadians(0), // Adjust as needed
-    //     pitch: CesiumMath.toRadians(-45), // Pitch angle (e.g., -45 degrees for a bird's eye view)
-    //     roll: 0.0
-    //   },
-    //   duration: 3 // Fly duration in seconds
-    // });
 }
+
 
 // Function to add equipment to the map
 export async function placeEquipment(assetId, position, height, tilt) {
