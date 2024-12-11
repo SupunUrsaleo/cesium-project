@@ -1,4 +1,4 @@
-import { addSignalClassification } from './Antenna';
+import { addSignalClassification, addSignalClassificationDemo } from './Antenna';
 import { placeTower, placeEquipment } from '../services/CesiumService';
 import { saveTowers } from '../services/StorageService';
 import { calculateOffsetPosition } from '../utils/CoordinateUtils';
@@ -70,7 +70,7 @@ export function setupFormSubmission() {
     // Place the tower and add it to the map
     placeTower(newTower);
     // saveTowers(newTower);
-    // addSignalClassification(newTower);
+    addSignalClassificationDemo(newTower);
 
     // Optional: clear the form after submission
     // document.getElementById('inputForm').reset();

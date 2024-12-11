@@ -28,7 +28,11 @@
       <button type="button" id="placeTowerBtn">Place Tower</button>
     </form>
   </div>
-  
+
+  <!-- mouse hover coordinate -->
+  <div id="coordinatesOverlay" style="display: none; position: absolute; z-index: 10; color: white; background: rgba(0, 0, 0, 0.6); padding: 5px; border-radius: 3px;">
+    <p id="coordinatesText" style="margin: 0;"></p>
+  </div>
   
   <!-- Form for tower details, adding antennas, and deleting towers -->
   <div id="infoTowerForm" style="display: none;">
@@ -42,12 +46,12 @@
 
   <div id="cesiumContainer"></div>
 
-  <!-- Signal Strength Slider
+  <!-- Signal Strength Slider -->
   <div id="sliderContainer">
     <label for="radiusSlider"> Signal Strength:</label>
-    <input type="range" id="radiusSlider" min="50" max="1000" step="10" value="150">
+    <input type="range" id="radiusSlider" min="50" max="3000" step="10" value="150">
     <span id="radiusValue">150</span> m
-  </div>   -->
+  </div>  
 
   <script type="module" src="./index.js"></script>
 </body>

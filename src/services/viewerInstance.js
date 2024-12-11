@@ -1,4 +1,4 @@
-import { Viewer, CustomDataSource, Ion, createGooglePhotorealistic3DTileset, Rectangle, Color, Entity, viewerCesiumInspectorMixin, createWorldTerrainAsync } from 'cesium';
+import { JulianDate, Viewer, CustomDataSource, Ion, createGooglePhotorealistic3DTileset, Rectangle, Color, Entity, viewerCesiumInspectorMixin, createWorldTerrainAsync } from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 window.CESIUM_BASE_URL = '/Cesium';
@@ -24,6 +24,13 @@ export const viewer = new Viewer('cesiumContainer', {
 // Add a Custom Data Source for towers
 export const dataSource = new CustomDataSource("towers");
 viewer.dataSources.add(dataSource);
+
+// Set the optimal lighting for the area of interest
+viewer.scene.skyAtmosphere.show = true;
+const currentTime = JulianDate.fromIso8601(
+"2020-01-09T23:00:39.018261982600961346Z"
+);
+viewer.clock.currentTime = currentTime;
 
 // Function to load Google Photorealistic 3D Tiles
 async function loadGooglePhotorealistic3D() {
